@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HoopShot — Бросок в корзину</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF5A1F;
+    --orange-glow: #FF8C42;
+    --dark: #0D0D0D;
+    --darker: #080808;
+    --court: #C47C2B;
+    --cream: #F5EDD8;
+    --accent: #FFD166;
+    --text-muted: #7a6a55;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--dark);
+    color: var(--cream);
+    font-family: 'Barlow Condensed', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE TEXTURE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ─── COURT LINES BG ─── */
+  .bg-court {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 120% 80% at 50% 110%, rgba(196,124,43,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255,90,31,0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .court-lines {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 350px;
+    opacity: 0.07;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 48px;
+    border-bottom: 1px solid rgba(245,237,216,0.06);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.1em;
+    color: var(--orange);
+    text-shadow: 0 0 30px rgba(255,90,31,0.5);
+  }
+
+  .logo span { color: var(--cream); }
+
+  nav a {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-left: 36px;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--cream); }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 80px 24px 60px;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(255,90,31,0.12);
+    border: 1px solid rgba(255,90,31,0.3);
+    color: var(--orange);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 32px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 14vw, 12rem);
+    line-height: 0.88;
+    letter-spacing: 0.02em;
+    color: var(--cream);
+    animation: fadeDown 0.7s 0.1s ease both;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--orange);
+    text-shadow: 0 0 60px rgba(255,90,31,0.4);
+  }
+
+  .hero-sub {
+    font-size: 1.15rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    max-width: 480px;
+    margin-top: 28px;
+    line-height: 1.6;
+    animation: fadeDown 0.7s 0.2s ease both;
+  }
+
+  /* ─── BALL VISUAL ─── */
+  .ball-display {
+    position: relative;
+    margin: 56px auto;
+    width: 160px;
+    height: 160px;
+    animation: fadeDown 0.7s 0.3s ease both;
+  }
+.ball-display .ball {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #FF8C42, #C94A00 70%);
+    box-shadow:
+      0 0 60px rgba(255,90,31,0.4),
+      0 20px 60px rgba(0,0,0,0.6),
+      inset 0 -10px 30px rgba(0,0,0,0.3);
+    position: relative;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .ball-display .ball::before,
+  .ball-display .ball::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.35);
+  }
+
+  .ball-display .ball::before {
+    width: 160px;
+    height: 60px;
+    top: 50px;
+    left: 0;
+    border-radius: 50%;
+    transform: scaleY(0.25);
+  }
+
+  .ball-display .ball::after {
+    width: 60px;
+    height: 160px;
+    top: 0;
+    left: 50px;
+    border-radius: 50%;
+    transform: scaleX(0.25);
+  }
+
+  .ball-shadow {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 20px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    filter: blur(8px);
+    animation: shadow-pulse 3s ease-in-out infinite;
+  }
+
+  /* ─── CTA BUTTON ─── */
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--orange);
+    color: #000;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.12em;
+    padding: 18px 48px;
+    border-radius: 3px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 30px rgba(255,90,31,0.4);
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+
+  .cta-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent 50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 40px rgba(255,90,31,0.6); }
+  .cta-btn:hover::before { opacity: 1; }
+  .cta-btn:active { transform: translateY(0); }
+
+  .cta-icon { font-size: 1.6rem; }
+
+  /* ─── STATS STRIP ─── */
+  .stats {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin: 60px auto;
+    max-width: 700px;
+    border: 1px solid rgba(245,237,216,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+    animation: fadeUp 0.7s 0.5s ease both;
+  }
+
+  .stat {
+    flex: 1;
+    padding: 28px 20px;
+    text-align: center;
+    border-right: 1px solid rgba(245,237,216,0.08);
+    background: rgba(255,255,255,0.02);
+    transition: background 0.2s;
+  }
+  .stat:last-child { border-right: none; }
+  .stat:hover { background: rgba(255,90,31,0.05); }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    color: var(--orange);
+    line-height: 1;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* ─── FEATURES ─── */
+  .features {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    max-width: 900px;
+    margin: 0 auto 80px;
+    background: rgba(245,237,216,0.06);
+    border: 1px solid rgba(245,237,216,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+    animation: fadeUp 0.7s 0.6s ease both;
+    padding: 0 24px;
+  }
+
+  .feature {
+    background: var(--dark);
+    padding: 36px 28px;
+    text-align: center;
+  }
+
+  .feature-icon { font-size: 2.2rem; margin-bottom: 14px; }
+
+  .feature h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    color: var(--cream);
+    margin-bottom: 8px;
+  }
+
+  .feature p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+/* ─── FOOTER ─── */
+  footer {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 28px;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(122,106,85,0.4);
+    border-top: 1px solid rgba(245,237,216,0.04);
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-18px); }
+  }
+  @keyframes shadow-pulse {
+    0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.5; }
+    50%       { transform: translateX(-50%) scaleX(0.65); opacity: 0.2; }
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 16px 20px; }
+    nav { display: none; }
+    .features { grid-template-columns: 1fr; padding: 0; }
+    .stats { flex-direction: column; }
+    .stat { border-right: none; border-bottom: 1px solid rgba(245,237,216,0.08); }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-court"></div>
+
+<!-- Court lines SVG -->
+<svg class="court-lines" viewBox="0 0 700 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="350" cy="330" rx="340" ry="20" stroke="white" stroke-width="2"/>
+  <circle cx="350" cy="330" r="80" stroke="white" stroke-width="2"/>
+  <line x1="10" y1="330" x2="690" y2="330" stroke="white" stroke-width="2"/>
+  <rect x="200" y="200" width="300" height="130" stroke="white" stroke-width="2"/>
+  <rect x="270" y="260" width="160" height="70" stroke="white" stroke-width="2"/>
+</svg>
+
+<!-- Header -->
+<header>
+  <div class="logo">Hoop<span>Shot</span></div>
+  <nav>
+    <a href="#">Главная</a>
+    <a href="game.html">Играть</a>
+    <a href="#">Рекорды</a>
+  </nav>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="badge">🏀 Mini Basketball Game</div>
+
+  <h1>БРОСЬ<br><em>МЯЧ</em><br>В КОРЗИНУ</h1>
+
+  <p class="hero-sub">
+    Точный угол. Нужная сила. Идеальный бросок.<br>
+    Сможешь ли ты побить рекорд?
+  </p>
+
+  <div class="ball-display">
+    <div class="ball"></div>
+    <div class="ball-shadow"></div>
+  </div>
+
+  <a href="game.html" class="cta-btn">
+    <span class="cta-icon">🏀</span>
+    НАЧАТЬ ИГРУ
+  </a>
+</section>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-value">30</div>
+    <div class="stat-label">секунд раунд</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">∞</div>
+    <div class="stat-label">попыток</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">3×</div>
+    <div class="stat-label">множитель комбо</div>
+  </div>
+</div>
+
+<!-- Features -->
+<div class="features">
+  <div class="feature">
+    <div class="feature-icon">🎯</div>
+    <h3>Физика броска</h3>
+    <p>Реальная баллистика мяча с трением воздуха и отскоком</p>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">🔥</div>
+    <h3>Серии комбо</h3>
+    <p>Попадай несколько раз подряд и получай бонусные очки</p>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">⏱️</div>
+    <h3>Таймер</h3>
+    <p>30 секунд — набери максимум очков до конца раунда</p>
+  </div>
+</div>
+
+<footer>© 2026 HoopShot &nbsp;·&nbsp; Все права защищены</footer>
+
+</body>
+</html>
