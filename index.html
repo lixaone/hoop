@@ -3,106 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HoopShot — Бросок в корзину</title>
+<title>HoopShot</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --orange: #FF5A1F;
-    --orange-glow: #FF8C42;
     --dark: #0D0D0D;
-    --darker: #080808;
-    --court: #C47C2B;
     --cream: #F5EDD8;
+    --muted: #7a6a55;
     --accent: #FFD166;
-    --text-muted: #7a6a55;
+    --red: #EF476F;
   }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
-    background-color: var(--dark);
+    background: var(--dark);
     color: var(--cream);
     font-family: 'Barlow Condensed', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
   }
 
-  /* ─── NOISE TEXTURE OVERLAY ─── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.4;
-  }
+  /* ══ SCREENS ══ */
+  .screen { position: fixed; inset: 0; flex-direction: column; align-items: center; justify-content: center; }
+  .screen.hidden { display: none !important; }
 
-  /* ─── COURT LINES BG ─── */
-  .bg-court {
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 120% 80% at 50% 110%, rgba(196,124,43,0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255,90,31,0.08) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .court-lines {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 700px;
-    height: 350px;
-    opacity: 0.07;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ─── HEADER ─── */
-  header {
-    position: relative;
-    z-index: 10;
+  /* ══ HOME SCREEN ══ */
+  #homeScreen {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px 48px;
-    border-bottom: 1px solid rgba(245,237,216,0.06);
+    background: var(--dark);
+    text-align: center;
+    overflow-y: auto;
   }
 
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem;
-    letter-spacing: 0.1em;
-    color: var(--orange);
-    text-shadow: 0 0 30px rgba(255,90,31,0.5);
+  .home-bg {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(196,124,43,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255,90,31,0.1) 0%, transparent 50%);
+    pointer-events: none;
   }
 
-  .logo span { color: var(--cream); }
-
-  nav a {
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    text-decoration: none;
-    margin-left: 36px;
-    transition: color 0.2s;
-  }
-  nav a:hover { color: var(--cream); }
-
-  /* ─── HERO ─── */
-  .hero {
+  .home-inner {
     position: relative;
     z-index: 10;
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
-    padding: 80px 24px 60px;
+    padding: 40px 24px 60px;
+    width: 100%;
   }
 
   .badge {
@@ -116,228 +65,184 @@
     text-transform: uppercase;
     padding: 6px 16px;
     border-radius: 2px;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
     animation: fadeDown 0.6s ease both;
   }
 
-  .hero h1 {
+  .home-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(5rem, 14vw, 12rem);
+    font-size: clamp(4rem, 16vw, 10rem);
     line-height: 0.88;
     letter-spacing: 0.02em;
     color: var(--cream);
     animation: fadeDown 0.7s 0.1s ease both;
   }
+  .home-title em { font-style: normal; color: var(--orange); text-shadow: 0 0 60px rgba(255,90,31,0.4); }
 
-  .hero h1 em {
-    font-style: normal;
-    color: var(--orange);
-    text-shadow: 0 0 60px rgba(255,90,31,0.4);
-  }
-
-  .hero-sub {
-    font-size: 1.15rem;
-    font-weight: 400;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    max-width: 480px;
-    margin-top: 28px;
+  .home-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 400px;
+    margin-top: 24px;
     line-height: 1.6;
     animation: fadeDown 0.7s 0.2s ease both;
   }
 
-  /* ─── BALL VISUAL ─── */
-  .ball-display {
+  /* Ball */
+  .ball-wrap {
     position: relative;
-    margin: 56px auto;
-    width: 160px;
-    height: 160px;
+    margin: 44px auto;
+    width: 130px; height: 130px;
     animation: fadeDown 0.7s 0.3s ease both;
   }
-.ball-display .ball {
-    width: 160px;
-    height: 160px;
+  .ball-3d {
+    width: 130px; height: 130px;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #FF8C42, #C94A00 70%);
-    box-shadow:
-      0 0 60px rgba(255,90,31,0.4),
-      0 20px 60px rgba(0,0,0,0.6),
-      inset 0 -10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 0 50px rgba(255,90,31,0.4), 0 20px 50px rgba(0,0,0,0.6), inset 0 -10px 30px rgba(0,0,0,0.3);
     position: relative;
     animation: float 3s ease-in-out infinite;
   }
-
-  .ball-display .ball::before,
-  .ball-display .ball::after {
-    content: '';
-    position: absolute;
-    border-radius: 50%;
+  .ball-3d::before, .ball-3d::after {
+    content: ''; position: absolute; border-radius: 50%;
     border: 2px solid rgba(0,0,0,0.35);
   }
-
-  .ball-display .ball::before {
-    width: 160px;
-    height: 60px;
-    top: 50px;
-    left: 0;
-    border-radius: 50%;
-    transform: scaleY(0.25);
-  }
-
-  .ball-display .ball::after {
-    width: 60px;
-    height: 160px;
-    top: 0;
-    left: 50px;
-    border-radius: 50%;
-    transform: scaleX(0.25);
-  }
-
-  .ball-shadow {
-    position: absolute;
-    bottom: -20px;
-    left: 50%;
+  .ball-3d::before { width: 130px; height: 48px; top: 41px; left: 0; transform: scaleY(0.25); }
+  .ball-3d::after  { width: 48px; height: 130px; top: 0; left: 41px; transform: scaleX(0.25); }
+  .ball-shadow-el {
+    position: absolute; bottom: -16px; left: 50%;
     transform: translateX(-50%);
-    width: 120px;
-    height: 20px;
+    width: 100px; height: 16px;
     background: rgba(0,0,0,0.5);
-    border-radius: 50%;
-    filter: blur(8px);
+    border-radius: 50%; filter: blur(6px);
     animation: shadow-pulse 3s ease-in-out infinite;
   }
 
-  /* ─── CTA BUTTON ─── */
+  /* CTA */
   .cta-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 14px;
-    background: var(--orange);
-    color: #000;
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--orange); color: #000;
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.5rem;
-    letter-spacing: 0.12em;
-    padding: 18px 48px;
-    border-radius: 3px;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.15s, box-shadow 0.15s;
+    font-size: 1.5rem; letter-spacing: 0.12em;
+    padding: 16px 48px; border-radius: 3px;
+    border: none; cursor: pointer;
     box-shadow: 0 4px 30px rgba(255,90,31,0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
     animation: fadeUp 0.7s 0.4s ease both;
   }
-
-  .cta-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent 50%);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
   .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 40px rgba(255,90,31,0.6); }
-  .cta-btn:hover::before { opacity: 1; }
   .cta-btn:active { transform: translateY(0); }
 
-  .cta-icon { font-size: 1.6rem; }
-
-  /* ─── STATS STRIP ─── */
+  /* Stats strip */
   .stats {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-    gap: 0;
-    margin: 60px auto;
-    max-width: 700px;
+    display: flex; margin: 48px auto 0;
+    max-width: 600px; width: 100%;
     border: 1px solid rgba(245,237,216,0.08);
-    border-radius: 4px;
-    overflow: hidden;
+    border-radius: 4px; overflow: hidden;
     animation: fadeUp 0.7s 0.5s ease both;
   }
-
   .stat {
-    flex: 1;
-    padding: 28px 20px;
-    text-align: center;
+    flex: 1; padding: 22px 16px; text-align: center;
     border-right: 1px solid rgba(245,237,216,0.08);
     background: rgba(255,255,255,0.02);
-    transition: background 0.2s;
   }
   .stat:last-child { border-right: none; }
-  .stat:hover { background: rgba(255,90,31,0.05); }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; color: var(--orange); line-height: 1; }
+  .stat-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
 
-  .stat-value {
+  /* ══ GAME SCREEN ══ */
+  #gameScreen { display: none; background: var(--dark); }
+
+  /* Top bar */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px;
+    background: rgba(13,13,13,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(245,237,216,0.07);
+  }
+  .tb-logo {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem;
+    letter-spacing: 0.1em; color: var(--orange); cursor: pointer;
+  }
+  .tb-logo span { color: var(--cream); }
+  .hud { display: flex; gap: 28px; align-items: center; }
+  .hud-item { text-align: center; }
+  .hud-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+  .hud-value { font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; line-height: 1; color: var(--cream); }
+  #timerVal { color: var(--orange); }
+  #timerVal.low { color: var(--red); animation: pulse-red 0.5s ease infinite alternate; }
+  #comboDisplay {
+    font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem;
+    letter-spacing: 0.1em; color: var(--accent);
+    opacity: 0; transition: opacity 0.3s; min-width: 80px; text-align: center;
+  }
+  #comboDisplay.show { opacity: 1; }
+  .back-btn {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--muted);
+    background: none; border: none; cursor: pointer; transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--cream); }
+
+  #gameCanvas { display: block; margin: 52px auto 0; cursor: crosshair; }
+
+  #instructions {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+    z-index: 50; pointer-events: none;
+  }
+
+  /* Game overlays */
+  .g-overlay {
+    position: fixed; inset: 52px 0 0 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(13,13,13,0.93);
+    backdrop-filter: blur(16px);
+    z-index: 500; text-align: center;
+  }
+  .g-overlay.hidden { display: none; }
+
+  .g-overlay h2 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.8rem;
-    color: var(--orange);
-    line-height: 1;
-    letter-spacing: 0.05em;
+    font-size: clamp(3rem, 8vw, 6rem);
+    letter-spacing: 0.05em; color: var(--cream); margin-bottom: 10px;
   }
+  .g-overlay h2 em { font-style: normal; color: var(--orange); }
+  .g-overlay p { font-size: 1.05rem; color: var(--muted); margin-bottom: 32px; max-width: 400px; line-height: 1.6; }
 
-  .stat-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-top: 6px;
-  }
-
-  /* ─── FEATURES ─── */
-  .features {
-    position: relative;
-    z-index: 10;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    max-width: 900px;
-    margin: 0 auto 80px;
-    background: rgba(245,237,216,0.06);
-    border: 1px solid rgba(245,237,216,0.06);
-    border-radius: 4px;
-    overflow: hidden;
-    animation: fadeUp 0.7s 0.6s ease both;
-    padding: 0 24px;
-  }
-
-  .feature {
-    background: var(--dark);
-    padding: 36px 28px;
-    text-align: center;
-  }
-
-  .feature-icon { font-size: 2.2rem; margin-bottom: 14px; }
-
-  .feature h3 {
+  .big-score {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
-    letter-spacing: 0.08em;
-    color: var(--cream);
-    margin-bottom: 8px;
+    font-size: clamp(4rem, 12vw, 9rem);
+    color: var(--orange); text-shadow: 0 0 60px rgba(255,90,31,0.5);
+    line-height: 1; margin-bottom: 6px;
+  }
+  .score-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-bottom: 36px; }
+
+  .play-btn {
+    background: var(--orange); color: #000;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
+    letter-spacing: 0.12em; padding: 15px 48px;
+    border: none; border-radius: 3px; cursor: pointer;
+    box-shadow: 0 4px 30px rgba(255,90,31,0.45);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .play-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 40px rgba(255,90,31,0.6); }
+  .play-btn:active { transform: translateY(0); }
+
+  /* Score popup */
+  #scorePopup {
+    position: fixed; pointer-events: none;
+    font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
+    letter-spacing: 0.08em; color: var(--accent);
+    text-shadow: 0 0 20px rgba(255,209,102,0.6);
+    z-index: 600; opacity: 0;
   }
 
-  .feature p {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
-/* ─── FOOTER ─── */
-  footer {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    padding: 28px;
-    font-size: 0.78rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgba(122,106,85,0.4);
-    border-top: 1px solid rgba(245,237,216,0.04);
-  }
-
-  /* ─── ANIMATIONS ─── */
+  /* ══ ANIMATIONS ══ */
   @keyframes fadeDown {
     from { opacity: 0; transform: translateY(-20px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -348,17 +253,28 @@
   }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-18px); }
+    50%       { transform: translateY(-16px); }
   }
   @keyframes shadow-pulse {
     0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.5; }
-    50%       { transform: translateX(-50%) scaleX(0.65); opacity: 0.2; }
+    50%       { transform: translateX(-50%) scaleX(0.6); opacity: 0.2; }
+  }
+  @keyframes pulse-red {
+    from { color: var(--red); }
+    to   { color: #ff8080; }
+  }
+  @keyframes score-float {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    80%  { opacity: 1; transform: translateY(-65px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-90px) scale(0.9); }
+  }
+  @keyframes combo-bump {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.35); }
+    100% { transform: scale(1); }
   }
 
-  @media (max-width: 640px) {
-    header { padding: 16px 20px; }
-    nav { display: none; }
-    .features { grid-template-columns: 1fr; padding: 0; }
+  @media (max-width: 500px) {
     .stats { flex-direction: column; }
     .stat { border-right: none; border-bottom: 1px solid rgba(245,237,216,0.08); }
   }
@@ -366,85 +282,357 @@
 </head>
 <body>
 
-<div class="bg-court"></div>
+<!-- ══════════════ HOME SCREEN ══════════════ -->
+<div class="screen" id="homeScreen">
+  <div class="home-bg"></div>
+  <div class="home-inner">
+    <div class="badge">🏀 Mini Basketball Game</div>
+    <h1 class="home-title">БРОСЬ<br><em>МЯЧ</em><br>В КОРЗИНУ</h1>
+    <p class="home-sub">Точный угол. Нужная сила. Идеальный бросок.<br>Сможешь ли ты побить рекорд?</p>
 
-<!-- Court lines SVG -->
-<svg class="court-lines" viewBox="0 0 700 350" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <ellipse cx="350" cy="330" rx="340" ry="20" stroke="white" stroke-width="2"/>
-  <circle cx="350" cy="330" r="80" stroke="white" stroke-width="2"/>
-  <line x1="10" y1="330" x2="690" y2="330" stroke="white" stroke-width="2"/>
-  <rect x="200" y="200" width="300" height="130" stroke="white" stroke-width="2"/>
-  <rect x="270" y="260" width="160" height="70" stroke="white" stroke-width="2"/>
-</svg>
+    <div class="ball-wrap">
+      <div class="ball-3d"></div>
+      <div class="ball-shadow-el"></div>
+    </div>
 
-<!-- Header -->
-<header>
-  <div class="logo">Hoop<span>Shot</span></div>
-  <nav>
-    <a href="#">Главная</a>
-    <a href="game.html">Играть</a>
-    <a href="#">Рекорды</a>
-  </nav>
-</header>
+    <button class="cta-btn" id="goToGame">
+      <span>🏀</span> НАЧАТЬ ИГРУ
+    </button>
 
-<!-- Hero -->
-<section class="hero">
-  <div class="badge">🏀 Mini Basketball Game</div>
-
-  <h1>БРОСЬ<br><em>МЯЧ</em><br>В КОРЗИНУ</h1>
-
-  <p class="hero-sub">
-    Точный угол. Нужная сила. Идеальный бросок.<br>
-    Сможешь ли ты побить рекорд?
-  </p>
-
-  <div class="ball-display">
-    <div class="ball"></div>
-    <div class="ball-shadow"></div>
-  </div>
-
-  <a href="game.html" class="cta-btn">
-    <span class="cta-icon">🏀</span>
-    НАЧАТЬ ИГРУ
-  </a>
-</section>
-
-<!-- Stats -->
-<div class="stats">
-  <div class="stat">
-    <div class="stat-value">30</div>
-    <div class="stat-label">секунд раунд</div>
-  </div>
-  <div class="stat">
-    <div class="stat-value">∞</div>
-    <div class="stat-label">попыток</div>
-  </div>
-  <div class="stat">
-    <div class="stat-value">3×</div>
-    <div class="stat-label">множитель комбо</div>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">30</div>
+        <div class="stat-label">секунд раунд</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">∞</div>
+        <div class="stat-label">попыток</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">3×</div>
+        <div class="stat-label">множитель комбо</div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Features -->
-<div class="features">
-  <div class="feature">
-    <div class="feature-icon">🎯</div>
-    <h3>Физика броска</h3>
-    <p>Реальная баллистика мяча с трением воздуха и отскоком</p>
+<!-- ══════════════ GAME SCREEN ══════════════ -->
+<div class="screen hidden" id="gameScreen">
+
+  <!-- Top bar -->
+  <div id="topbar">
+    <div class="tb-logo" id="goHome">Hoop<span>Shot</span></div>
+    <div class="hud">
+      <div class="hud-item">
+        <div class="hud-label">Очки</div>
+        <div class="hud-value" id="scoreVal">0</div>
+      </div>
+      <div id="comboDisplay">🔥 КОМБО x<span id="comboNum">1</span></div>
+      <div class="hud-item">
+        <div class="hud-label">Время</div>
+        <div class="hud-value" id="timerVal">30</div>
+      </div>
+    </div>
+    <button class="back-btn" id="goHome2">← На главную</button>
   </div>
-  <div class="feature">
-    <div class="feature-icon">🔥</div>
-    <h3>Серии комбо</h3>
-    <p>Попадай несколько раз подряд и получай бонусные очки</p>
+
+  <canvas id="gameCanvas"></canvas>
+  <div id="instructions">Зажми на мяче и потяни назад для броска</div>
+  <div id="scorePopup"></div>
+
+  <!-- Start overlay -->
+  <div class="g-overlay" id="startOverlay">
+    <h2>ГОТОВ К <em>БРОСКУ?</em></h2>
+    <p>Зажми на мяче, потяни в сторону противоположную броску и отпусти.<br>30 секунд — набери максимум!</p>
+    <button class="play-btn" id="startBtn">🏀 НАЧАТЬ</button>
   </div>
-  <div class="feature">
-    <div class="feature-icon">⏱️</div>
-    <h3>Таймер</h3>
-    <p>30 секунд — набери максимум очков до конца раунда</p>
+
+  <!-- End overlay -->
+  <div class="g-overlay hidden" id="endOverlay">
+    <h2>ВРЕМЯ <em>ВЫШЛО!</em></h2>
+    <div class="big-score" id="finalScore">0</div>
+    <div class="score-label">Очков набрано</div>
+    <button class="play-btn" id="restartBtn">🔄 ЕЩЁ РАЗ</button>
   </div>
+
 </div>
 
-<footer>© 2026 HoopShot &nbsp;·&nbsp; Все права защищены</footer>
+<script>
+// ══════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════
+const homeScreen = document.getElementById('homeScreen');
+const gameScreen = document.getElementById('gameScreen');
 
-</body>
-</html>
+function showHome() {
+  stopGame();
+  gameScreen.classList.add('hidden');
+  gameScreen.style.display = 'none';
+  homeScreen.classList.remove('hidden');
+  homeScreen.style.display = 'flex';
+}
+
+function showGame() {
+  homeScreen.classList.add('hidden');
+  homeScreen.style.display = 'none';
+  gameScreen.classList.remove('hidden');
+  gameScreen.style.display = 'block';
+  resize();
+  resetScene();
+  // show start overlay
+  document.getElementById('startOverlay').classList.remove('hidden');
+  document.getElementById('endOverlay').classList.add('hidden');
+}
+
+document.getElementById('goToGame').addEventListener('click', showGame);
+document.getElementById('goHome').addEventListener('click', showHome);
+document.getElementById('goHome2').addEventListener('click', showHome);
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('restartBtn').addEventListener('click', startGame);
+
+// ══════════════════════════════════════
+//  GAME ENGINE
+// ══════════════════════════════════════
+const canvas = document.getElementById('gameCanvas');
+const ctx    = canvas.getContext('2d');
+
+let score, combo, timeLeft, gameActive, timerID, animID;
+let ball, isDragging, dragStart, dragNow, throwScored;
+let hoop, hoopDir, hoopSpeed;
+let particles = [];
+
+const GRAVITY  = 0.38;
+const FRICTION = 0.995;
+
+function resize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight - 52;
+}
+window.addEventListener('resize', () => { resize(); resetScene(); });
+
+// ── RESET ──
+function resetScene() {
+  resetBall();
+  resetHoop();
+}
+
+function resetBall() {
+  ball = {
+    x: canvas.width * 0.15 + 20,
+    y: canvas.height * 0.78,
+    r: 22,
+    vx: 0, vy: 0,
+    flying: false,
+    rotation: 0,
+  };
+  isDragging = false;
+  dragStart = { x: 0, y: 0 };
+  dragNow   = { x: 0, y: 0 };
+  throwScored = false;
+}
+
+function resetHoop() {
+  hoop = { x: canvas.width * 0.65, y: canvas.height * 0.35, rimW: 44 };
+  hoopDir   = 1;
+  hoopSpeed = 0.7;
+}
+
+// ── GAME FLOW ──
+function startGame() {
+  document.getElementById('startOverlay').classList.add('hidden');
+  document.getElementById('endOverlay').classList.add('hidden');
+
+  score = 0; combo = 0; timeLeft = 30; gameActive = true;
+  particles = [];
+
+  document.getElementById('scoreVal').textContent  = '0';
+  document.getElementById('timerVal').textContent  = '30';
+  document.getElementById('timerVal').classList.remove('low');
+  document.getElementById('comboDisplay').classList.remove('show');
+
+  resize();
+  resetScene();
+
+  clearInterval(timerID);
+  timerID = setInterval(() => {
+    timeLeft--;
+    const tv = document.getElementById('timerVal');
+    tv.textContent = timeLeft;
+    if (timeLeft <= 10) tv.classList.add('low'); else tv.classList.remove('low');
+    if (timeLeft <= 0) endGame();
+  }, 1000);
+}
+
+function endGame() {
+  clearInterval(timerID);
+  gameActive = false;
+  isDragging = false;
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('endOverlay').classList.remove('hidden');
+}
+
+function stopGame() {
+  clearInterval(timerID);
+  cancelAnimationFrame(animID);
+  gameActive = false;
+}
+
+// ── SCORING ──
+function addScore(pts) {
+  const mul = Math.min(combo, 3);
+  const total = pts * (mul || 1);
+  score += total;
+  document.getElementById('scoreVal').textContent = score;
+
+  const rect = canvas.getBoundingClientRect();
+  const el = document.getElementById('scorePopup');
+  el.textContent = '+' + total;
+  el.style.left = (ball.x + rect.left - 20) + 'px';
+  el.style.top  = (ball.y + rect.top - 20) + 'px';
+  el.style.animation = 'none';
+  void el.offsetWidth;
+  el.style.animation = 'score-float 0.9s ease forwards';
+}
+
+function updateCombo() {
+  const el  = document.getElementById('comboDisplay');
+  const num = document.getElementById('comboNum');
+  if (combo >= 2) {
+    num.textContent = combo;
+    el.classList.add('show');
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = 'combo-bump 0.3s ease';
+  } else {
+    el.classList.remove('show');
+  }
+}
+
+// ── PARTICLES ──
+function spawnParticles(x, y) {
+  for (let i = 0; i < 18; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const s = 2 + Math.random() * 5;
+    particles.push({
+      x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s - 2,
+      r: 3 + Math.random() * 4, life: 1,
+      decay: 0.025 + Math.random() * 0.025,
+      color: Math.random() > 0.5 ? '#FF8C42' : '#FFD166',
+    });
+  }
+}
+
+// ── COLLISION ──
+function checkHoop() {
+  if (!ball.flying || throwScored) return;
+  const left  = hoop.x - hoop.rimW;
+  const right = hoop.x + hoop.rimW;
+  const cy    = hoop.y;
+
+  if (ball.vy > 0 &&
+      ball.x > left + 8 && ball.x < right - 8 &&
+      ball.y - ball.r <= cy + 12 && ball.y + ball.r >= cy - 4) {
+    throwScored = true;
+    combo++;
+    addScore(10);
+    updateCombo();
+    spawnParticles(ball.x, ball.y);
+  }
+
+  // Rim bounce
+  const hitLeft  = Math.abs(ball.x - left)  < ball.r + 5 && Math.abs(ball.y - cy) < ball.r + 12;
+  const hitRight = Math.abs(ball.x - right) < ball.r + 5 && Math.abs(ball.y - cy) < ball.r + 12;
+  if (hitLeft || hitRight) {
+    ball.vx *= -0.4;
+    ball.vy *= -0.4;
+    ball.x  += ball.vx * 2;
+  }
+}
+
+// ── DRAW ──
+function drawCourt() {
+  const gh = ctx.createLinearGradient(0, canvas.height * 0.55, 0, canvas.height);
+  gh.addColorStop(0, 'rgba(196,124,43,0.03)');
+  gh.addColorStop(1, 'rgba(196,124,43,0.13)');
+  ctx.fillStyle = gh;
+  ctx.fillRect(0, canvas.height * 0.55, canvas.width, canvas.height * 0.45);
+
+  ctx.strokeStyle = 'rgba(245,237,216,0.07)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height * 0.88);
+  ctx.lineTo(canvas.width, canvas.height * 0.88);
+  ctx.stroke();
+}
+
+function drawBackboard() {
+  const bx = hoop.x + hoop.rimW + 12;
+  const by = hoop.y - 55;
+  const bw = 14, bh = 80;
+
+  ctx.fillStyle = 'rgba(245,237,216,0.12)';
+  ctx.fillRect(bx + 3, by + bh, 8, canvas.height);
+
+  ctx.fillStyle = 'rgba(245,237,216,0.08)';
+  ctx.strokeStyle = 'rgba(245,237,216,0.25)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(bx, by, bw, bh, 2);
+  ctx.fill(); ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(255,90,31,0.45)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(bx + 2, by + 18, bw - 4, 28);
+}
+
+function drawHoop() {
+  const cx = hoop.x, cy = hoop.y, rw = hoop.rimW;
+
+  // Net
+  ctx.strokeStyle = 'rgba(245,237,216,0.22)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 10; i++) {
+    const t  = i / 10;
+    const nx = cx - rw + rw * 2 * t;
+    const sag = Math.sin(t * Math.PI) * 8;
+    ctx.beginPath();
+    ctx.moveTo(nx, cy);
+    ctx.bezierCurveTo(nx - 3 + sag, cy + 16, nx + 3 - sag, cy + 34, nx + (t - 0.5) * 8, cy + 50);
+    ctx.stroke();
+  }
+  for (let j = 1; j <= 3; j++) {
+    const t2 = j / 4, ny = cy + t2 * 50, nw = rw * (1 - t2 * 0.45);
+    ctx.beginPath();
+    ctx.moveTo(cx - nw, ny); ctx.lineTo(cx + nw, ny);
+    ctx.stroke();
+  }
+
+  // Rim shadow
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 5, rw, 5, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fill();
+
+  // Rim
+  const rg = ctx.createLinearGradient(cx - rw, cy - 4, cx + rw, cy + 8);
+  rg.addColorStop(0, '#FF5A1F'); rg.addColorStop(0.4, '#FF8C42'); rg.addColorStop(1, '#C94A00');
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rw, 8, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = rg; ctx.lineWidth = 5; ctx.stroke();
+
+  // Shine
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - 2, rw * 0.55, 3, 0, Math.PI, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 2; ctx.stroke();
+}
+
+function drawBall() {
+  ctx.save();
+  ctx.translate(ball.x, ball.y);
+  ctx.rotate(ball.rotation);
+
+  if (!ball.flying) {
+    ctx.beginPath();
+    ctx.ellipse(0, canvas.height * 0.88 - ball.y + 7, ball.r * 1.1, 5, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fill();
+  }
+  
