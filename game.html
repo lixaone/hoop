@@ -33,7 +33,7 @@
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
     pointer-events: none;
-    z-index: 9999;
+    z-index: 1;
     opacity: 0.35;
   }
 
@@ -130,7 +130,7 @@
     justify-content: center;
     background: rgba(13,13,13,0.92);
     backdrop-filter: blur(16px);
-    z-index: 200;
+    z-index: 10000;
     text-align: center;
   }
 
@@ -172,7 +172,8 @@
     color: var(--text-muted);
     margin-bottom: 40px;
   }
-.play-btn {
+
+  .play-btn {
     background: var(--orange);
     color: #000;
     font-family: 'Bebas Neue', sans-serif;
@@ -268,7 +269,7 @@
 <div class="overlay" id="startOverlay">
   <h2>ГОТОВ<br>К <em>БРОСКУ?</em></h2>
   <p>Зажми на мяче, выбери направление и отпусти.<br>30 секунд — набери максимум очков!</p>
-  <button class="play-btn" onclick="startGame()">🏀 НАЧАТЬ</button>
+  <button class="play-btn" id="startBtn">🏀 НАЧАТЬ</button>
 </div>
 
 <!-- End Overlay -->
@@ -276,7 +277,7 @@
   <h2>ВРЕМЯ<br><em>ВЫШЛО!</em></h2>
   <div class="big-score" id="final-score">0</div>
   <div class="score-label">Очков набрано</div>
-  <button class="play-btn" onclick="startGame()">🔄 ЕЩЁ РАЗ</button>
+  <button class="play-btn" id="restartBtn">🔄 ЕЩЁ РАЗ</button>
 </div>
 
 <script>
@@ -332,6 +333,7 @@ function resetHoop() {
   };
   hoopSpeed = 0.6 + Math.random() * 0.5;
 }
+
 // ── PARTICLES ──
 let particles = [];
 function spawnParticles(x, y, color) {
@@ -481,6 +483,7 @@ function drawBackboard() {
   ctx.lineWidth = 1.5;
   ctx.strokeRect(bx + 2, by + 20, bw - 4, 32);
 }
+
 function drawHoop() {
   const cx = hoop.x;
   const cy = hoop.y;
@@ -614,8 +617,8 @@ function drawArrow() {
 
   // Gradient arrow
   const arrowGrad = ctx.createLinearGradient(ball.x, ball.y, ex, ey);
-  arrowGrad.addColorStop(0, rgba(255,90,31,${t * 0.8}));
-  arrowGrad.addColorStop(1, rgba(255,209,102,${t * 0.3}));
+  arrowGrad.addColorStop(0, `rgba(255,90,31,${t * 0.8})`);
+  arrowGrad.addColorStop(1, `rgba(255,209,102,${t * 0.3})`);
 
   ctx.strokeStyle = arrowGrad;
   ctx.lineWidth   = 3;
@@ -632,11 +635,12 @@ function drawArrow() {
   ctx.lineTo(-14, -6);
   ctx.lineTo(-14, 6);
   ctx.closePath();
-  ctx.fillStyle = rgba(255,209,102,${t * 0.7});
+  ctx.fillStyle = `rgba(255,209,102,${t * 0.7})`;
   ctx.fill();
 
   ctx.restore();
 }
+
 function drawParticles() {
   for (const p of particles) {
     ctx.beginPath();
@@ -800,4 +804,4 @@ function startGame() {
   particles  = [];
 
   document.getElementById('score-val').textContent  = '0';
-  document.getElementById('timer-val'
+  document.getElementById('timer-val').textContent  
